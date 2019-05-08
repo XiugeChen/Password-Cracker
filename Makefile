@@ -6,8 +6,8 @@ BIN_DIR = bin
 CC = gcc
 CFLAGS = -std=c99 -O3 -Wall -Wpedantic -I$(IDIR)
 
-_DEPS =
-_OBJ = crack.o
+_DEPS = pwd_crack.h sha256.h
+_OBJ = crack.o pwd_crack.o sha256.o
 
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))

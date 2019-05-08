@@ -34,8 +34,15 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <stdbool.h>
+
+#include "pwd_crack.h"
+
+// constant
+static char const * const HASH_FILE_PATH = "../resources/passwords/pwd4sha256";
+// static char const * const HASH_FILE_PATH = "../resources/passwords/pwd6sha256";
 
 // Declarations
 bool check_args(int argc, char * argv[]);
@@ -48,18 +55,22 @@ void print_usage();
   Return: execution status(integer)
 */
 int main(int argc, char * argv[]) {
+  // 0 means infinity number of guesses will be performed
+  int num_guess = 0;
+
   if (!check_args(argc, argv))
-    return 0;
+    exit(EXIT_FAILURE);
 
   switch (argc) {
     case 1:
-      //crackPassword();
+      crack_pwd(HASH_FILE_PATH, NULL, num_guess);
       break;
     case 2:
-      //crackPassword();
+      num_guess = atoi(argv[1]);
+      crack_pwd(HASH_FILE_PATH, NULL, num_guess);
       break;
     case 3:
-      //crackPassword();
+      crack_pwd(argv[2], argv[1], num_guess);
       break;
     default:
       break;
