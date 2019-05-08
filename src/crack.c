@@ -38,9 +38,9 @@
 #include <stdbool.h>
 
 // Declarations
-bool checkArgs(int argc, char * argv[]);
-bool checkNum(const char* str);
-void printUsage();
+bool check_args(int argc, char * argv[]);
+bool check_num(const char* str);
+void print_usage();
 
 /*
   main control
@@ -48,7 +48,7 @@ void printUsage();
   Return: execution status(integer)
 */
 int main(int argc, char * argv[]) {
-  if (!checkArgs(argc, argv))
+  if (!check_args(argc, argv))
     return 0;
 
   switch (argc) {
@@ -73,14 +73,14 @@ int main(int argc, char * argv[]) {
   Parameter: number of command line arguments(integer), command line arguments(1D string array)
   Return: arguments is valid(bool)
 */
-bool checkArgs(int argc, char* argv[]) {
+bool check_args(int argc, char* argv[]) {
   if (argc > 3) {
-      printUsage();
+      print_usage();
       return false;
   }
 
   if (argc == 2)
-    return checkNum(argv[1]);
+    return check_num(argv[1]);
 
   return true;
 }
@@ -90,12 +90,12 @@ bool checkArgs(int argc, char* argv[]) {
   Parameter: string
   Return: true if the string only contains number
 */
-bool checkNum(const char* str) {
+bool check_num(const char* str) {
   int i = 0;
 
   while (str[i] != '\0') {
     if (!isdigit(str[i])) {
-      printUsage();
+      print_usage();
       return false;
     }
 
@@ -108,7 +108,7 @@ bool checkNum(const char* str) {
 /*
   print the correct usage in stderr
 */
-void printUsage() {
+void print_usage() {
   fprintf(stderr, "Wrong configuration, please follow the usage\n");
   fprintf(stderr, "usage 1: ./crack\n");
   fprintf(stderr, "usage 2: ./crack <numGuess>\n");

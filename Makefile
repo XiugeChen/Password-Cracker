@@ -18,7 +18,10 @@ $(ODIR)/%.o: $(SDIR)/%.c $(DEPS)
 crack: $(OBJ)
 	$(CC) -o $(BIN_DIR)/$@ $^ $(CFLAGS)
 
-all: mkdirs crack
+dh: $(SDIR)/dh.c
+	$(CC) -o $(BIN_DIR)/dh $(SDIR)/dh.c $(CFLAGS)
+
+all: mkdirs crack dh
 
 .PHONY: clean
 
