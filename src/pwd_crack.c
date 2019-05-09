@@ -12,23 +12,40 @@
 */
 
 #include "pwd_crack.h"
-#include "sha256.h"
 
 void crack_pwd(const char* hash_file, const char* pwd_file, const int num_guess) {
-  unsigned char** hash_result = NULL;
-  unsigned char buffer[BUFFER_SIZE];
+  BYTE** hash_result = NULL;
+  BYTE buffer[BUFFER_SIZE];
 
-  read_hash_file(hash_file, buffer);
-  int res_len = store_hash_result(buffer, hash_result);
+  int byte_len = read_hash_file(hash_file, buffer);
+  int hash_len = store_hash_result(buffer, byte_len, &hash_result);
 
-  free_hash_result(hash_result, res_len);
+  search_pwd(hash_result, hash_len, pwd_file, num_guess);
 
-  
+  free_hash_result(hash_result, hash_len);
 }
 
-
 // helper functions
-void read_hash_file(const char* hash_file, unsigned char* buffer) {
+void search_pwd(BYTE** hash_result, const int hash_len, const char* pwd_file,
+  const int num_guess) {
+
+  // TEST
+  printf("test start!\n");
+  SHA256_CTX ctx;
+  BYTE test[] = {"xiug"};
+  BYTE buf[SHA256_BLOCK_SIZE];
+
+  sha256_init(&ctx);
+  sha256_update(&ctx, test, strlen((char*)test));
+  sha256_final(&ctx, buf);
+
+  for(int i = 0; i < hash_len; i++) {
+    if (memcmp(hash_result[i], buf, SHA256_BLOCK_SIZE) == 0)
+      printf("xiug %d\n", i + 1);
+  }
+}
+
+int read_hash_file(const char* hash_file, BYTE* buffer) {
   FILE *fp;
 
   fp = fopen(hash_file, "rb");
@@ -42,28 +59,30 @@ void read_hash_file(const char* hash_file, unsigned char* buffer) {
   int filelen = ftell(fp);
   rewind(fp);
 
-  fread(buffer, sizeof(unsigned char), filelen, fp);
+  fread(buffer, sizeof(BYTE), filelen, fp);
 
   // append string terminator char at the end of string
-  int end_index = filelen / NUM_BIT_PER_BYTE;
-  buffer[end_index] = '\0';
+  buffer[filelen] = '\0';
 
   fclose(fp);
+
+  return filelen;
 }
 
-int store_hash_result(unsigned char* buffer, unsigned char** hash_result) {
-  unsigned char* cur = buffer;
+int store_hash_result(BYTE* buffer, int byte_len, BYTE*** hash_result) {
+  BYTE* cur = buffer;
+
   // get the number of hash results
-  int num_hash = strlen((char*)buffer) * NUM_BIT_PER_BYTE / SHA256_BLOCK_SIZE;
+  int num_hash = byte_len / SHA256_BLOCK_SIZE;
 
   // allocate memory for hash results array
-  hash_result = (unsigned char**) malloc(num_hash * sizeof(unsigned char*));
+  *hash_result = (BYTE**) malloc(num_hash * sizeof(BYTE*));
   for (int i = 0; i < num_hash; i++) {
-    hash_result[i] = (unsigned char*) malloc(SHA256_BLOCK_SIZE * sizeof(unsigned char));
+    (*hash_result)[i] = (BYTE*) malloc(SHA256_BLOCK_SIZE * sizeof(BYTE));
 
     // store next SHA256_BLOCK_SIZE number of bytes from buffer into hash_result
-    for (int j = 0; j < SHA256_BLOCK_SIZE / NUM_BIT_PER_BYTE; j++) {
-      hash_result[i][j] = *cur;
+    for (int j = 0; j < SHA256_BLOCK_SIZE; j++) {
+      (*hash_result)[i][j] = *cur;
       cur++;
     }
   }
@@ -71,7 +90,7 @@ int store_hash_result(unsigned char* buffer, unsigned char** hash_result) {
   return num_hash;
 }
 
-void free_hash_result(unsigned char** hash_result, int res_len) {
+void free_hash_result(BYTE** hash_result, int res_len) {
   if (hash_result != NULL) {
     for (int i = 0; i < res_len; i++) {
       if (hash_result[i] != NULL)

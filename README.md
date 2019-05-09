@@ -17,6 +17,7 @@ To execute after compile:
 1. Diffie-Hellman key change client side:
 
 `cd bin/`
+
 `./dh`
 
 2.
@@ -36,9 +37,15 @@ University of Melbourne
 
 Some code came from:
 1. GitHub
-  a. sha256.h and sha256.c: https://github.com/B-Con/crypto-algorithms/blob/master/sha256_test.c
+
+  (a) sha256.h and sha256.c: https://github.com/B-Con/crypto-algorithms/blob/master/sha256_test.c
+
 2. geeksforgeeks:
-  a. part of dh.c: https://www.geeksforgeeks.org/modular-exponentiation-power-in-modular-arithmetic/
-3. stack overflow
-  a. part of dh.c: https://stackoverflow.com/questions/646241/c-run-a-system-command-and-get-output
+
+  (a) part of dh.c: https://www.geeksforgeeks.org/modular-exponentiation-power-in-modular-arithmetic/
+
+3. Stack overflow
+
+  (a) part of dh.c: https://stackoverflow.com/questions/646241/c-run-a-system-command-and-get-output
+
 4. Lab 5 of COMP30023 at Unimelb

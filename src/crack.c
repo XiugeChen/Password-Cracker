@@ -109,7 +109,6 @@ bool check_num(const char* str) {
       print_usage();
       return false;
     }
-
     i++;
   }
 
