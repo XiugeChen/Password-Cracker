@@ -41,7 +41,7 @@
 #include "pwd_crack.h"
 
 // constant
-static char const * const HASH_FILE_PATH = "../resources/passwords/pwd4sha256";
+static char const * const HASH_FILE_PATH = "../resources/hash_results/pwd4sha256";
 // static char const * const HASH_FILE_PATH = "../resources/passwords/pwd6sha256";
 
 // Declarations
