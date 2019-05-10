@@ -34,14 +34,14 @@ int read_hash_file(const char* hash_file, BYTE* buffer) {
   int filelen = ftell(fp);
   rewind(fp);
 
-  fread(buffer, sizeof(BYTE), filelen, fp);
+  int n = fread(buffer, sizeof(BYTE), filelen, fp);
 
   // append string terminator char at the end of string
-  buffer[filelen] = '\0';
+  buffer[n] = '\0';
 
   fclose(fp);
 
-  return filelen;
+  return n;
 }
 
 int store_hash_result(BYTE* buffer, int byte_len, BYTE*** hash_result) {

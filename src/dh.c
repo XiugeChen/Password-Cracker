@@ -21,6 +21,9 @@
 	3. Lab 5 of COMP30023 at Unimelb
 */
 
+// make popen and pclose work
+#define _XOPEN_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -35,16 +38,15 @@
 // constant
 #define BUFFER_SIZE 2048
 
-static char const * const FILE_PATH = "../src/dh.c";
+static char const * const FILE_PATH = "./src/dh.c";
 static char const * const USERNAME = "xiugec\n";
-static int const USERNAME_LEN = 7;
+static const int USERNAME_LEN = 7;
 static char const * const SERVER = "172.26.37.44";
-static int const PROT = 7800;
-static unsigned long long const G = 15;
-static unsigned long long const P = 97;
+static const int PROT = 7800;
+static const unsigned long long G = 15;
+static const unsigned long long P = 97;
 // number of hexadecimal digits converted from hash result used for b
-static int const HASH_NUM = 2;
-
+static const int HASH_NUM = 2;
 
 // decleration
 void get_sha256_hash(const char* file_path, char* buffer);
@@ -122,7 +124,6 @@ int main(int argc, char* argv[]) {
 
 /*
 	efficiently compute modular exponentiation
-
 	some codes are borrowed from geeksforgeeks.com
 	URL: https://www.geeksforgeeks.org/modular-exponentiation-power-in-modular-arithmetic/
 */
@@ -174,7 +175,6 @@ unsigned long long extract_hash(char* buffer) {
 
 /*
 	store SHA256 hash of specific file into buffer
-
 	some codes are borrowed from stackoverflow.com
 	URL: https://stackoverflow.com/questions/646241/c-run-a-system-command-and-get-output
 */

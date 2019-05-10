@@ -17,11 +17,11 @@
 #include "sha256.h"
 
 // constant
-#define MAX_SUB 64
-#define NUM_RULES 26
+#define MAX_SUB 16
+#define NUM_RULES 27
 static const char CHARS[NUM_RULES] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
 	'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w',
-	'x', 'y', 'z'};
+	'x', 'y', 'z', ' '};
 static const char SUBS[NUM_RULES][MAX_SUB] = {
 	{'A', '@'}, // a
 	{'B'}, // b
@@ -48,7 +48,8 @@ static const char SUBS[NUM_RULES][MAX_SUB] = {
 	{'W'}, // w
 	{'X'}, // x
 	{'Y'}, // y
-	{'Z'} // z
+	{'Z'}, // z
+	{'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '&'} // space
 };
 
 // data structure

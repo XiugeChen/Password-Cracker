@@ -9,6 +9,7 @@ q|ao 7
 wime 9
 xiug 1
 school 2
+Sch0oL 4
 School 9
 oxford 14
 nipper 5
