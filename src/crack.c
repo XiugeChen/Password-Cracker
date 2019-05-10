@@ -9,10 +9,12 @@
   arbitrary strings
 
   Password Description:
-  Passwords 1 to 10 are all four characters, located in file resources/passwords/pwd4sha256
-  This 􏰁le contains 320 bytes. The 􏰁rst 32 bytes are the SHA256 hash of password 1,
+  Passwords 1 to 10 are all four characters, located in file "../resources/passwords/pwd4sha256"
+  This 􏰁file contains 320 bytes. The 􏰁rst 32 bytes are the SHA256 hash of password 1,
   the second 32 bytes are the hash of password 2 etc..
-  Hashes 11 to 30 are for six character passwords,
+
+  Hashes 11 to 30 are all six character passwords, located in file "../resources/passwords/pwd6sha256"
+  This 􏰁file contains 640 bytes and followed the same convention as the first file.
 
   for more information, please refer to resources/project_description.pdf
 
@@ -41,7 +43,8 @@
 #include "pwd_crack.h"
 
 // constant
-static char const * const HASH_FILE_PATH = "../resources/hash_results/pwd4sha256";
+static char const * const HASH_FILE_PATH = "./resources/hash_results/pwd4sha256";
+static int const PWD_LEN = 4;
 // static char const * const HASH_FILE_PATH = "../resources/passwords/pwd6sha256";
 
 // Declarations
@@ -56,21 +59,21 @@ void print_usage();
 */
 int main(int argc, char * argv[]) {
   // 0 means infinity number of guesses will be performed
-  int num_guess = 0;
+  int num_guess = -1;
 
   if (!check_args(argc, argv))
     exit(EXIT_FAILURE);
 
   switch (argc) {
     case 1:
-      crack_pwd(HASH_FILE_PATH, NULL, num_guess);
+      crack_pwd(HASH_FILE_PATH, NULL, num_guess, PWD_LEN);
       break;
     case 2:
       num_guess = atoi(argv[1]);
-      crack_pwd(HASH_FILE_PATH, NULL, num_guess);
+      crack_pwd(HASH_FILE_PATH, NULL, num_guess, PWD_LEN);
       break;
     case 3:
-      crack_pwd(argv[2], argv[1], num_guess);
+      crack_pwd(argv[2], argv[1], num_guess, PWD_LEN);
       break;
     default:
       break;

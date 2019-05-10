@@ -1,13 +1,12 @@
 IDIR = include
 ODIR = obj
 SDIR = src
-BIN_DIR = bin
 
 CC = gcc
 CFLAGS = -std=c99 -O3 -Wall -Wpedantic -I$(IDIR)
 
-_DEPS = pwd_crack.h sha256.h
-_OBJ = crack.o pwd_crack.o sha256.o
+_DEPS = pwd_crack.h hash_manage.h sha256.h
+_OBJ = crack.o pwd_crack.o hash_manage.o sha256.o
 
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
@@ -15,18 +14,18 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 $(ODIR)/%.o: $(SDIR)/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
+all: mkdirs crack dh
+
 crack: $(OBJ)
-	$(CC) -o $(BIN_DIR)/$@ $^ $(CFLAGS)
+	$(CC) -o $@ $^ $(CFLAGS)
 
 dh: $(SDIR)/dh.c
-	$(CC) -o $(BIN_DIR)/dh $(SDIR)/dh.c $(CFLAGS)
-
-all: mkdirs crack dh
+	$(CC) -o dh $(SDIR)/dh.c $(CFLAGS)
 
 .PHONY: clean
 
 clean:
-	rm -rf $(BIN_DIR) $(ODIR)
+	rm -rf $(ODIR) crack dh
 
 mkdirs:
-	mkdir -p $(BIN_DIR) $(ODIR)
+	mkdir -p $(ODIR)
