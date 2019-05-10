@@ -44,7 +44,7 @@
 
 // constant
 static char const * const HASH_FILE_PATH = "./resources/hash_results/pwd6sha256";
-static int const PWD_LEN = 6;
+static const int PWD_LEN = 6;
 /*
 static char const * const HASH_FILE_PATH = "../resources/passwords/pwd6sha256";
 static int const PWD_LEN = 6;

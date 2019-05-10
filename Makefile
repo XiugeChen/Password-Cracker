@@ -5,8 +5,8 @@ SDIR = src
 CC = gcc
 CFLAGS = -std=c99 -O3 -Wall -Wpedantic -I$(IDIR)
 
-_DEPS = pwd_crack.h hash_manage.h sha256.h
-_OBJ = crack.o pwd_crack.o hash_manage.o sha256.o
+_DEPS = pwd_crack.h hash_manage.h sha256.h common_sub.h
+_OBJ = crack.o pwd_crack.o hash_manage.o sha256.o common_sub.o
 
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))

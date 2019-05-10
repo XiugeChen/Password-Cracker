@@ -62,7 +62,6 @@ void compare_pwd(BYTE** hash_result, const int hash_len, const char* pwd_file,
     exit(EXIT_FAILURE);
   }
 
-  BYTE hash_buf[SHA256_BLOCK_SIZE];
   BYTE read_buf[BUFFER_SIZE] = "\0";
   bool has_next_line = false;
 
@@ -73,14 +72,7 @@ void compare_pwd(BYTE** hash_result, const int hash_len, const char* pwd_file,
 
     // if there is password being read
     if (*read_buf != '\n' && *read_buf != '\0') {
-      generate_sha256(read_buf, hash_buf);
-
-      // compare new hash result stored in hash_buf with all hash results
-      for(int i = 0; i < hash_len; i++) {
-        if (memcmp(hash_result[i], hash_buf, SHA256_BLOCK_SIZE) == 0)
-          printf("%s %d\n", read_buf, i + 1);
-      }
-
+      check_match(hash_result, hash_len, read_buf);
       (*left_guess)--;
     }
   } while (has_next_line && *left_guess != 0);
@@ -104,7 +96,6 @@ void dict_attack(BYTE** hash_result, const int hash_len, const int pwd_len,
       exit(EXIT_FAILURE);
     }
 
-    BYTE hash_buf[SHA256_BLOCK_SIZE];
     BYTE read_buf[BUFFER_SIZE] = "\0";
     BYTE* password = (BYTE*)malloc((pwd_len + 1) * sizeof(BYTE));
     bool has_next_line = false;
@@ -121,36 +112,81 @@ void dict_attack(BYTE** hash_result, const int hash_len, const int pwd_len,
 
       // if there is password being read
       if (*read_buf != '\n' && *read_buf != '\0') {
+        int read_buf_len = strlen((char*)read_buf);
+
         // only check those passwords have same or greater than specified length
-        if (pwd_len <= strlen((char*)read_buf)) {
+        if (pwd_len <= read_buf_len) {
           // for each start point of substring
-          for (int i = 0; i <= strlen((char*)read_buf) - pwd_len; i++) {
+          for (int i = 0; i <= read_buf_len - pwd_len; i++) {
             // get the whole substring stored in password
             for (int j = 0; j < pwd_len; j++) {
               password[j] = read_buf[i + j];
             }
 
-            generate_sha256(password, hash_buf);
-            // compare new hash result stored in hash_buf with all hash results
-            for(int i = 0; i < hash_len; i++) {
-              if (memcmp(hash_result[i], hash_buf, SHA256_BLOCK_SIZE) == 0)
-                printf("%s %d\n", password, i + 1);
-            }
+            check_match(hash_result, hash_len, password);
 
             // reach the limits of number of guesses
             (*left_guess)--;
             if (*left_guess == 0)
               break;
+
+            smart_BF_attack(hash_result, hash_len, password, left_guess);
           }
         }
-        // for passwords have shorter length than specified, still do smart
-        // brute force attack (punctuation...)
+        // for passwords have shorter length than specified, fill it with blank
+        // spaces and do smart brute force attack
+        else {
+          strcpy((char*)password, (char*)read_buf);
 
+          for (int i = 0; i < pwd_len - read_buf_len; i++) {
+            password[read_buf_len + i] = ' ';
+          }
+
+          smart_BF_attack(hash_result, hash_len, password, left_guess);
+        }
       }
     } while (has_next_line);
 
     fclose(fp);
     free(password);
+}
+
+void smart_BF_attack(BYTE** hash_result, const int hash_len, BYTE* password,
+  int* left_guess) {
+
+  BYTE backup_buffer[BUFFER_SIZE];
+  BYTE c;
+  BYTE sub[MAX_SUB] = "\0";
+  COMMON_SUB_MAP* map = NULL;
+
+  init_sub_map(&map);
+  strcpy((char*)backup_buffer, (char*)password);
+
+  // for all characters in the password, get its common substitution and replace
+  // it, then try to match it
+  for (int pwd_i = 0; pwd_i < strlen((char*)password); pwd_i++) {
+    c = password[pwd_i];
+    get_sub(map, c, sub);
+
+    if (*sub != '\0') {
+      for (int sub_i = 0; sub_i < strlen((char*)sub); sub_i++) {
+        password[pwd_i] = sub[sub_i];
+        check_match(hash_result, hash_len, password);
+
+        // recover the password
+        strcpy((char*)password, (char*)backup_buffer);
+
+        // reach the limits of number of guesses
+        (*left_guess)--;
+        if (*left_guess == 0)
+          break;
+      }
+    }
+
+    *sub = '\0';
+  }
+
+  free_sub_map(map);
 }
 
 // only support password length 4
@@ -199,6 +235,17 @@ void lazy_BF_attack(BYTE** hash_result, const int hash_len, int* left_guess,
   }
 
   free(password);
+}
+
+void check_match(BYTE** hash_result, const int hash_len, BYTE* password) {
+  BYTE hash_buf[SHA256_BLOCK_SIZE];
+
+  generate_sha256(password, hash_buf);
+  // compare new hash result stored in hash_buf with all hash results
+  for(int i = 0; i < hash_len; i++) {
+    if (memcmp(hash_result[i], hash_buf, SHA256_BLOCK_SIZE) == 0)
+      printf("%s %d\n", password, i + 1);
+  }
 }
 
 bool get_next_line(FILE* fp, BYTE* buffer) {
