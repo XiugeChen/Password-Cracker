@@ -16,16 +16,16 @@ Hashes 11 to 30 are all six character passwords, located in file "../resources/p
 This 􏰁file contains 640 bytes and followed the same convention as the first file.
 
 Password breaking/generating technologies being used here are:
-1. *flexible dictionary attack*:
+1. **flexible dictionary attack**:
 
 Some of common passwords are provided from COMP30023
 Others are collected from
 
-When performing dictionary attack, if the password length has been specified,
+When performing dictionary attack, password length has to be specified,
 the program will check all the substrings of each password that has the same
 length.
 
-2. *smart brute force attack*:
+2. **smart brute force attack**:
 
 Within the dictionary attack, if the program fail to match the current stored
 password with hash results, then the program will also try smart brute force
@@ -42,7 +42,7 @@ c. add punctuation at the start or end of password
 
 d. add number at the start or end of password
 
-3. *lazy brute force attack*:
+3. **lazy brute force attack**:
 
 Try all possible combinations, currently only support specified password length 4.
 
@@ -50,11 +50,11 @@ For detailed description please look at resources/project_description.pdf
 
 ## EXECUTION COMMAND (Linux)
 
-*To compile*:
+**To compile**:
 
 `make`
 
-*To execute after compile*:
+**To execute after compile**:
 
 1. Diffie-Hellman key change client side:
 
@@ -79,7 +79,7 @@ c.
 where pwd_file is the file path to the file contains a list of plain text passwords (one per line)
 hash_file is the file path to the file contains hash results of passwords (one per 32 bytes)
 
-*To clean up executable and object files and directories*:
+**To clean up executable and object files and directories**:
 
 `make clean`
 

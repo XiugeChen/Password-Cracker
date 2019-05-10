@@ -43,21 +43,18 @@ void search_pwd(BYTE** hash_result, const int hash_len, const int num_guess,
   int left_guess = num_guess;
 
   // try flexible dictionary attack and smart brute force attack first
-  dict_attack(hash_result, hash_len, &left_guess, DICT_FILE_PATH, pwd_len);
+  dict_attack(hash_result, hash_len, pwd_len, &left_guess, DICT_FILE_PATH);
   if (num_guess == 0)
     return;
 
   // then try lazy brute force attack
-  lazy_BF_attack(hash_result, hash_len, &left_guess, pwd_len);
+  // lazy_BF_attack(hash_result, hash_len, &left_guess, pwd_len);
 }
 
 void compare_pwd(BYTE** hash_result, const int hash_len, const char* pwd_file,
   int* left_guess) {
 
   FILE* fp;
-  BYTE hash_buf[SHA256_BLOCK_SIZE];
-  BYTE read_buf[BUFFER_SIZE] = "\0";
-  bool has_next_line = false;
 
   fp = fopen(pwd_file, "r");
   if (fp == NULL) {
@@ -65,12 +62,16 @@ void compare_pwd(BYTE** hash_result, const int hash_len, const char* pwd_file,
     exit(EXIT_FAILURE);
   }
 
-  // read password file line by line and test whether its in hash results
+  BYTE hash_buf[SHA256_BLOCK_SIZE];
+  BYTE read_buf[BUFFER_SIZE] = "\0";
+  bool has_next_line = false;
+
+  // read password file line by line and test whether it matches hash results
   // if reach the limits of number of guesses, stop
   do {
     has_next_line = get_next_line(fp, read_buf);
 
-    // if there is password being read and has specified length (-1 if none specified)
+    // if there is password being read
     if (*read_buf != '\n' && *read_buf != '\0') {
       generate_sha256(read_buf, hash_buf);
 
@@ -87,10 +88,69 @@ void compare_pwd(BYTE** hash_result, const int hash_len, const char* pwd_file,
   fclose(fp);
 }
 
-void dict_attack(BYTE** hash_result, const int hash_len, int* left_guess,
-  const char* dict_file, const int pwd_len) {
+void dict_attack(BYTE** hash_result, const int hash_len, const int pwd_len,
+  int* left_guess, const char* dict_file) {
 
-  compare_pwd(hash_result, hash_len, dict_file, left_guess);
+    if (pwd_len <= 0) {
+      perror("Can't attack without specified password length");
+      exit(EXIT_FAILURE);
+    }
+
+    FILE* fp;
+
+    fp = fopen(dict_file, "r");
+    if (fp == NULL) {
+      perror("No such file");
+      exit(EXIT_FAILURE);
+    }
+
+    BYTE hash_buf[SHA256_BLOCK_SIZE];
+    BYTE read_buf[BUFFER_SIZE] = "\0";
+    BYTE* password = (BYTE*)malloc((pwd_len + 1) * sizeof(BYTE));
+    bool has_next_line = false;
+
+    password[pwd_len] = '\0';
+
+    // read dictionary file line by line, extract all substrings with length
+    // pwd_len for each password, and then test whether matches hash results.
+    // Why: human tend to use substring of name, words... to generate passwords
+    // that are easy to memorize)
+    // if reach the limits of number of guesses, stop
+    do {
+      has_next_line = get_next_line(fp, read_buf);
+
+      // if there is password being read
+      if (*read_buf != '\n' && *read_buf != '\0') {
+        // only check those passwords have same or greater than specified length
+        if (pwd_len <= strlen((char*)read_buf)) {
+          // for each start point of substring
+          for (int i = 0; i <= strlen((char*)read_buf) - pwd_len; i++) {
+            // get the whole substring stored in password
+            for (int j = 0; j < pwd_len; j++) {
+              password[j] = read_buf[i + j];
+            }
+
+            generate_sha256(password, hash_buf);
+            // compare new hash result stored in hash_buf with all hash results
+            for(int i = 0; i < hash_len; i++) {
+              if (memcmp(hash_result[i], hash_buf, SHA256_BLOCK_SIZE) == 0)
+                printf("%s %d\n", password, i + 1);
+            }
+
+            // reach the limits of number of guesses
+            (*left_guess)--;
+            if (*left_guess == 0)
+              break;
+          }
+        }
+        // for passwords have shorter length than specified, still do smart
+        // brute force attack (punctuation...)
+
+      }
+    } while (has_next_line);
+
+    fclose(fp);
+    free(password);
 }
 
 // only support password length 4
@@ -99,8 +159,8 @@ void lazy_BF_attack(BYTE** hash_result, const int hash_len, int* left_guess,
 
   // only brute force when the length of passwords has been specified
   if (pwd_len != 4) {
-    perror("Can't do brute force attack on unspecified length");
-    exit(EXIT_FAILURE);
+    fprintf(stderr, "Can't brute force on password length other than 4");
+    return;
   }
 
   BYTE hash_buf[SHA256_BLOCK_SIZE];
