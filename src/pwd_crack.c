@@ -116,12 +116,8 @@ bool dict_attack(BYTE** hash_result, const int hash_len, const int pwd_len,
             for (int j = 0; j < pwd_len; j++)
               password[j] = read_buf[i + j];
 
-            check_match(hash_result, hash_len, password);
-
             // reach the limits of number of guesses
-            (*left_guess)--;
-            if (*left_guess == 0 || !smart_bf_attack(hash_result, hash_len,
-              password, left_guess)) {
+            if (!smart_bf_attack(hash_result, hash_len, password, left_guess)) {
               fclose(fp);
               free(password);
               return false;
@@ -147,7 +143,6 @@ bool dict_attack(BYTE** hash_result, const int hash_len, const int pwd_len,
 
     fclose(fp);
     free(password);
-
     return true;
 }
 
@@ -181,10 +176,14 @@ bool smart_bf_attack(BYTE** hash_result, const int hash_len, BYTE* password,
 
   // try to generate brute force attack on all common substitution of password
   if (!bf_search_match(hash_result, hash_len, left_guess, candidate_chars, pwd_len)) {
+    for (int i = 0; i < pwd_len; i++)
+      free(candidate_chars[i]);
     free(candidate_chars);
     return false;
   }
 
+  for (int i = 0; i < pwd_len; i++)
+    free(candidate_chars[i]);
   free(candidate_chars);
   return true;
 }
@@ -209,10 +208,14 @@ bool lazy_bf_attack(BYTE** hash_result, const int hash_len, int* left_guess,
 
   // try to generate brute force attack on all common substitution of password
   if (!bf_search_match(hash_result, hash_len, left_guess, candidate_chars, pwd_len)) {
+    for (int i = 0; i < pwd_len; i++)
+      free(candidate_chars[i]);
     free(candidate_chars);
     return false;
   }
 
+  for (int i = 0; i < pwd_len; i++)
+    free(candidate_chars[i]);
   free(candidate_chars);
   return true;
 }
@@ -234,7 +237,9 @@ bool bf_search_match(BYTE** hash_result, const int hash_len, int* left_guess,
     for (int j = 0; j < pwd_len; j++) {
       int len = strlen((char*)candidate_chars[j]);
       range /= len;
-      new_pwd[j] = candidate_chars[j][i / range % len];
+      // avoid float point exception
+      int choice = len > 1 ? (i / range % len) : 0;
+      new_pwd[j] = candidate_chars[j][choice];
     }
     new_pwd[pwd_len] = '\0';
 

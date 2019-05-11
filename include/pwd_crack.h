@@ -21,7 +21,7 @@
 #include "common_sub.h"
 
 /**** constant ****/
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 10240
 // number of bits of each byte
 #define NUM_BIT_PER_BYTE 8
 static char const * const DICT_FILE_PATH = "./resources/passwords/common_passwords.txt";
