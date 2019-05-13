@@ -8,43 +8,66 @@ six-character passwords. The passwords can contain any ASCII character from 32
 arbitrary strings
 
 Password Description:
-Passwords 1 to 10 are all four characters, located in file "../resources/passwords/pwd4sha256"
+Passwords 1 to 10 are all four characters, located in file "./resources/hash_results/pwd4sha256"
 This 􏰁file contains 320 bytes. The rest 32 bytes are the SHA256 hash of password 1,
 the second 32 bytes are the hash of password 2 etc..
 
-Hashes 11 to 30 are all six character passwords, located in file "../resources/passwords/pwd6sha256"
+Hashes 11 to 30 are all six character passwords, located in file "./resources/hash_results/pwd6sha256"
 This 􏰁file contains 640 bytes and followed the same convention as the first file.
 
 Several password breaking/generating technologies are being used here sequentially,
 the order of execution and detailed description of each methods are listed below:
 1. **dictionary attack**:
 
-Some of common passwords () are provided from COMP30023.
+This is the first approach will be used for attacking, because people are most likely
+to use passwords that are real daily-used words in English since they are the
+easiest to memorize.
+
+Some (9743) of common passwords are provided from COMP30023, stored in "./resources/passwords/common_passwords.txt".
 
 When performing dictionary attack, password length has to be specified,
-the program will check all the substrings of each password that has the same
-length.
+the program will go through all frequently used passwords stored in common_passwords.text
+and also check all the substrings of each password that has the specific length.
 
 2. **smart brute force attack**:
 
-Within the dictionary attack, if the program fail to match the current stored
-password with hash results, then the program will also try smart brute force
-attack, which basically does the expansion that combines the following rules:
+Second approach, since some people are aware of insecurity of real-word password
+but don't want to come up random passwords that are hard to remember, so they
+used some substitution to "create" stronger passwords. Therefore, replacing
+passwords obtained from "common_passwords.text" with common substitutions will
+also generate passwords are more likely to be used.
+
+Smart brute force basically does the expansion on dictionary words from "common_passwords.text"
+that combines the following rules:
 
 a. According to human common substitution convention, replace some character
-with its substitution, like n <-> m, n <-> h, i <-> |, i <-> 1, r <-> 2 and
-so on. All common substitution rules are stored at:
-"./resources/passwords/common_substitution".
+with its substitution, like n <-> m, i <-> |, r <-> 2 and so on.
+
+All common substitution rules are stored at: "./resources/passwords/common_substitution".
 
 b. Capitalize the first character.
 
-c. add punctuation at the start or end of password
+3. **Lazy brute force attack**:
 
-d. add number at the start or end of password
+Lazy brute force is all about try all possible combinations of given char set,
+although it certainly is not as efficient as previous approach, there are still
+some tricks and strategies could be used:
 
-3. **lazy brute force attack**:
+According to the analysis on common passwords in "common_passwords.text", most people
+like use a set of all numbers like birthdate, or a set of all lowercase alphabets
+like meaningful information, or a combination of alphabets and number as passwords.
+Therefore, instead of going through all possible combinations (including '~' ...),
+it is definitely more efficient to try a smaller range that might contain most of
+unrevealed passwords (ie. numbers and alphabets) first. So the execution sequence
+of lazy brute force attack is listed below:
 
-Try all possible combinations, currently only support specified password length 4.
+a. brute force on char set that only contains number.
+
+b. brute force on char set that only contains lowercase chars.
+
+c. brute force on char set that contains lowercase chars, numbers and uppercase chars.
+
+d. Lastly, try all possible combinations.
 
 For detailed description please look at resources/project_description.pdf
 

@@ -1,6 +1,9 @@
 /*
   common_sub.h
 
+	#### DESCRIPTION ###
+  common substitution of single character and related management
+
   #### ATTRIBUTION ####
   Xiuge Chen
   xiugec@student.unimelb.edu.au

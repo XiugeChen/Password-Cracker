@@ -2,7 +2,61 @@
   pwd_crack.h
 
   #### DESCRIPTION ####
+  Contains all strategies being used in password cracking, including dictionary
+  attack and smart/lazy brute force attack.
+  Also provide interface "crack_pwd" to call them automatically.
 
+  1. **dictionary attack**:
+
+  This is the first approach will be used for attacking, because people are most likely
+  to use passwords that are real daily-used words in English since they are the
+  easiest to memorize.
+
+  Some (9743) of common passwords are provided from COMP30023, stored in "./resources/passwords/common_passwords.txt".
+
+  When performing dictionary attack, password length has to be specified,
+  the program will go through all frequently used passwords stored in common_passwords.text
+  and also check all the substrings of each password that has the specific length.
+
+  2. **smart brute force attack**:
+
+  Second approach, since some people are aware of insecurity of real-word password
+  but don't want to come up random passwords that are hard to remember, so they
+  used some substitution to "create" stronger passwords. Therefore, replacing
+  passwords obtained from "common_passwords.text" with common substitutions will
+  also generate passwords are more likely to be used.
+
+  Smart brute force basically does the expansion on dictionary words from "common_passwords.text"
+  that combines the following rules:
+
+  a. According to human common substitution convention, replace some character
+  with its substitution, like n <-> m, i <-> |, r <-> 2 and so on.
+
+  All common substitution rules are stored at: "./resources/passwords/common_substitution".
+
+  b. Capitalize the first character.
+
+  3. **Lazy brute force attack**:
+
+  Lazy brute force is all about try all possible combinations of given char set,
+  although it certainly is not as efficient as previous approach, there are still
+  some tricks and strategies could be used:
+
+  According to the analysis on common passwords in "common_passwords.text", most people
+  like use a set of all numbers like birthdate, or a set of all lowercase alphabets
+  like meaningful information, or a combination of alphabets and number as passwords.
+  Therefore, instead of going through all possible combinations (including '~' ...),
+  it is definitely more efficient to try a smaller range that might contain most of
+  unrevealed passwords (ie. numbers and alphabets) first. So the execution sequence
+  of lazy brute force attack is listed below:
+
+  a. brute force on char set that only contains number.
+
+  b. brute force on char set that only contains lowercase chars.
+
+  c. brute force on char set that contains lowercase chars, numbers and uppercase chars.
+
+  d. Lastly, try all possible combinations.
 
   #### ATTRIBUTION ####
   Xiuge Chen
@@ -32,13 +86,13 @@
 #define NUM_BIT_PER_BYTE 8
 #define NUM_SUB 4
 static char const * const DICT_FILE_PATH = "./resources/passwords/common_passwords.txt";
-static const char STRAT_CHAR = ' ';
-static const char END_CHAR = '~';
 
 // used for brute force search
 static const char NUMBER_LIST[10] = "0123456789";
 static const char LOWER_CHAR_LIST[26] = "abcdefghijklmnopqrstuvwxyz";
 static const char COMMON_CHAR_LIST[62] = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+static const char STRAT_CHAR = ' ';
+static const char END_CHAR = '~';
 
 /*
   public interface using to call password cracker
@@ -56,7 +110,8 @@ void crack_pwd(const char* hash_file, const char* pwd_file, const int num_guess,
   search passwords
   Try flexible dictionary attack and smart brute force attack first since these
   technologies could help the program verify the mostly likely passwords first.
-  Then try lazy brute force attack(check all possible outcomes)
+  Then try lazy brute force attack from smaller to larger range
+  (check only numbers, only alphabets, numbers and alphabets, then all possible outcomes)
   For detailed description, please refer to README.
 */
 void search_pwd(BYTE** hash_result, const int hash_len, const int num_guess,
@@ -92,7 +147,7 @@ bool smart_bf_attack(BYTE** hash_result, const int hash_len, const int pwd_len,
   int* left_guess, const char* dict_file, const int num_sub);
 
 /*
-  lazy brute force attack (try all possible combination of given list and
+  lazy brute force attack (try all possible combination of given list range and
   password length)
   For detailed description, please refer to README.
 */
@@ -108,7 +163,7 @@ bool bf_search_match(BYTE** hash_result, const int hash_len, int* left_guess,
 
 /*
   check whether the given password matches any hash results
-  If so, print it out.
+  If so, print it out and mark it, so it won't be compare next time.
 */
 void check_match(BYTE** hash_result, const int hash_len, BYTE* password);
 

@@ -2,6 +2,7 @@
   array_manage.c
 
   #### DESCRIPTION ###
+  array managment
 
   #### ATTRIBUTION ####
   Xiuge Chen

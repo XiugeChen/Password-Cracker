@@ -2,7 +2,7 @@
   hash_manage.c
 
   #### DESCRIPTION ###
-
+  manage all executions about sha256 hash results generating
 
   #### ATTRIBUTION ####
   Xiuge Chen

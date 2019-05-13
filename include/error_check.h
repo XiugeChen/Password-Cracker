@@ -1,6 +1,9 @@
 /*
   error_check.h
 
+  #### DESCRIPTION ###
+  check common errors in program
+
   #### ATTRIBUTION ####
   Xiuge Chen
   xiugec@student.unimelb.edu.au

@@ -2,6 +2,7 @@
   error_check.c
 
   #### DESCRIPTION ###
+  check common errors in program
 
   #### ATTRIBUTION ####
   Xiuge Chen
@@ -42,7 +43,7 @@ bool check_num(const char* str) {
   while (str[i] != '\0') {
     if (!isdigit(str[i]))
       return false;
-    
+
     i++;
   }
 

@@ -2,7 +2,7 @@
   common_sub.c
 
   #### DESCRIPTION ###
-  common substitution of single character
+  common substitution of single character and related management
 
   #### ATTRIBUTION ####
   Xiuge Chen

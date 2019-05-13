@@ -1,6 +1,9 @@
 /*
   array_manage.h
 
+  #### DESCRIPTION ###
+  array managment
+
   #### ATTRIBUTION ####
   Xiuge Chen
   xiugec@student.unimelb.edu.au

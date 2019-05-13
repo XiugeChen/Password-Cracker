@@ -2,7 +2,11 @@
   pwd_crack.c
 
   #### DESCRIPTION ###
+  Contains all strategies being used in password cracking, including dictionary
+  attack and smart/lazy brute force attack.
+  Also provide interface "crack_pwd" to call them automatically.
 
+  For detailed description please refer to pwd_crack.h
 
   #### ATTRIBUTION ####
   Xiuge Chen
@@ -12,6 +16,12 @@
 */
 
 #include "pwd_crack.h"
+
+/**** Global Variable ****/
+// used for check whether hash results being attacked
+int CRACK_HASHS[1024] = {0};
+// brute force switch
+bool USE_BF = false;
 
 void crack_pwd(const char* hash_file, const char* pwd_file, const int num_guess,
   const int pwd_len) {
@@ -45,7 +55,7 @@ void search_pwd(BYTE** hash_result, const int hash_len, const int num_guess,
   if (!dict_attack(hash_result, hash_len, pwd_len, &left_guess, DICT_FILE_PATH))
     return;
 
-  // then try smart brute force attack (replace each char with its common substitution and uppercase)
+  // then try smart brute force attack (replace each char with its common substitution and upper)
   if (!smart_bf_attack(hash_result, hash_len, pwd_len, &left_guess, DICT_FILE_PATH, NUM_SUB))
     return;
 
@@ -62,8 +72,8 @@ void search_pwd(BYTE** hash_result, const int hash_len, const int num_guess,
   if (!lazy_bf_attack(hash_result, hash_len, &left_guess, pwd_len, COMMON_CHAR_LIST))
     return;
 
-  // try brute force on lowercase, uppercase and number characters
-  if (!lazy_bf_attack(hash_result, hash_len, &left_guess, pwd_len, NULL))
+  // try brute force on all possible characters
+  if (USE_BF && !lazy_bf_attack(hash_result, hash_len, &left_guess, pwd_len, NULL))
     return;
 }
 
@@ -231,9 +241,7 @@ bool smart_bf_attack(BYTE** hash_result, const int hash_len, const int pwd_len,
                   get_sub(map, c, sub_buf);
 
                   int buffer_len = strlen((char*)sub_buf);
-
                   sub_buf[buffer_len] = '\0';
-
                   strcat((char*)candidate_chars[l], (char*)sub_buf);
                 }
               }
@@ -243,6 +251,8 @@ bool smart_bf_attack(BYTE** hash_result, const int hash_len, const int pwd_len,
                 break;
             }
           }
+          if (*left_guess == 0)
+            break;
         }
       }
     }
@@ -346,8 +356,13 @@ void check_match(BYTE** hash_result, const int hash_len, BYTE* password) {
   generate_sha256(password, hash_buf);
   // compare new hash result stored in hash_buf with all hash results
   for(int i = 0; i < hash_len; i++) {
-    if (memcmp(hash_result[i], hash_buf, SHA256_BLOCK_SIZE) == 0)
+    if (CRACK_HASHS[i])
+      continue;
+
+    if (memcmp(hash_result[i], hash_buf, SHA256_BLOCK_SIZE) == 0) {
       printf("%s %d\n", password, i + 1);
+      CRACK_HASHS[i] = 1;
+    }
   }
 }
 
