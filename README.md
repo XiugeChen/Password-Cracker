@@ -15,11 +15,11 @@ the second 32 bytes are the hash of password 2 etc..
 Hashes 11 to 30 are all six character passwords, located in file "../resources/passwords/pwd6sha256"
 This 􏰁file contains 640 bytes and followed the same convention as the first file.
 
-Password breaking/generating technologies being used here are:
-1. **flexible dictionary attack**:
+Several password breaking/generating technologies are being used here sequentially,
+the order of execution and detailed description of each methods are listed below:
+1. **dictionary attack**:
 
-Some of common passwords are provided from COMP30023
-Others are collected from
+Some of common passwords () are provided from COMP30023.
 
 When performing dictionary attack, password length has to be specified,
 the program will check all the substrings of each password that has the same

@@ -10,7 +10,8 @@
   Subject: COMP30023 Computer Systems
   University of Melbourne
 */
-#include "common_sub.h"
+
+#include <common_sub.h>
 
 void init_sub_map(COMMON_SUB_MAP** map) {
   if (*map != NULL)
@@ -23,6 +24,8 @@ void init_sub_map(COMMON_SUB_MAP** map) {
     strcpy((char*)(*map)[i].sub, SUBS[i]);
   }
 }
+
+
 
 void get_sub(COMMON_SUB_MAP* map, BYTE c, BYTE* sub) {
   if (map == NULL)

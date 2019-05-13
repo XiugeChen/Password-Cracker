@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sha256.h"
+#include <sha256.h>
 
 /*
   given a plain text of string, generate sha256 result and store it in buffer

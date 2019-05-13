@@ -10,13 +10,15 @@
   Subject: COMP30023 Computer Systems
   University of Melbourne
 */
-#include "hash_manage.h"
+#include <hash_manage.h>
 
 void generate_sha256(BYTE* text, BYTE* buffer) {
   SHA256_CTX ctx;
 
+  int text_len = strlen((char*)text);
+
   sha256_init(&ctx);
-  sha256_update(&ctx, text, strlen((char*)text));
+  sha256_update(&ctx, text, text_len);
   sha256_final(&ctx, buffer);
 }
 

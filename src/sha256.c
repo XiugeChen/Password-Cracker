@@ -5,7 +5,7 @@
 	All following code came from GitHub: https://github.com/B-Con/crypto-algorithms/blob/master/sha256_test.c
 */
 
-#include "sha256.h"
+#include <sha256.h>
 
 
 /*********************************************************************

@@ -40,19 +40,16 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-#include "pwd_crack.h"
+#include <pwd_crack.h>
+#include <error_check.h>
 
 // constant
-static char const * const HASH_FILE_PATH = "./resources/hash_results/pwd6sha256";
-static const int PWD_LEN = 6;
-/*
-static char const * const HASH_FILE_PATH = "../resources/passwords/pwd6sha256";
-static int const PWD_LEN = 6;
-*/
+#define PWD_LEN 4
+
+static char const * const HASH_PWD6_PATH = "./resources/hash_results/pwd6sha256";
+static char const * const HASH_PWD4_PATH = "./resources/hash_results/pwd4sha256";
 
 // Declarations
-bool check_args(int argc, char * argv[]);
-bool check_num(const char* str);
 void print_usage();
 
 /*
@@ -64,61 +61,28 @@ int main(int argc, char * argv[]) {
   // 0 means infinity number of guesses will be performed
   int num_guess = -1;
 
-  if (!check_args(argc, argv))
+  if (!check_args(argc, argv)) {
+    print_usage();
     exit(EXIT_FAILURE);
+  }
 
   switch (argc) {
-    case 1:
-      crack_pwd(HASH_FILE_PATH, NULL, num_guess, PWD_LEN);
-      break;
     case 2:
       num_guess = atoi(argv[1]);
-      crack_pwd(HASH_FILE_PATH, NULL, num_guess, PWD_LEN);
+    case 1:
+      if (PWD_LEN == 4)
+        crack_pwd(HASH_PWD4_PATH, NULL, num_guess, 4);
+      else if (PWD_LEN == 6)
+        crack_pwd(HASH_PWD6_PATH, NULL, num_guess, 6);
       break;
     case 3:
-      crack_pwd(argv[2], argv[1], num_guess, PWD_LEN);
+      crack_pwd(argv[2], argv[1], num_guess, 0);
       break;
     default:
       break;
   }
 
   return 0;
-}
-
-/*
-  validate command line arguments
-  Parameter: number of command line arguments(integer), command line arguments(1D string array)
-  Return: arguments is valid(bool)
-*/
-bool check_args(int argc, char* argv[]) {
-  if (argc > 3) {
-      print_usage();
-      return false;
-  }
-
-  if (argc == 2)
-    return check_num(argv[1]);
-
-  return true;
-}
-
-/*
-  validate whether a string is a number
-  Parameter: string
-  Return: true if the string only contains number
-*/
-bool check_num(const char* str) {
-  int i = 0;
-
-  while (str[i] != '\0') {
-    if (!isdigit(str[i])) {
-      print_usage();
-      return false;
-    }
-    i++;
-  }
-
-  return true;
 }
 
 /*
