@@ -85,6 +85,7 @@ int main(int argc, char* argv[]) {
 
 	// get the SHA256 hash of this C source
 	get_sha256_hash(FILE_PATH, buffer);
+	printf("Hash result: %s\n", buffer);
 
 	unsigned long long b = extract_hash(buffer);
 
@@ -188,7 +189,12 @@ void get_sha256_hash(const char* file_path, char* buffer) {
 	fp = popen(command, "r");
 	if (fp == NULL) {
     fprintf(stderr, "Fail to run command: %s\n", command);
-    exit(EXIT_FAILURE);
+		printf("Please input hash result by hand: \n");
+		char* str = fgets(buffer, BUFFER_SIZE, stdin);
+		if (str == NULL) {
+			fprintf(stderr, "Read Failure\n");
+			exit(EXIT_FAILURE);
+		}
   }
 
 	/* Read the output a line at a time - output it. */
