@@ -72,9 +72,11 @@ void search_pwd(BYTE** hash_result, const int hash_len, const int num_guess,
   if (!lazy_bf_attack(hash_result, hash_len, &left_guess, pwd_len, COMMON_CHAR_LIST))
     return;
 
+  /* UNCOMMET THIS TO TRY BRUTE FORCE SEARCH
   // try brute force on all possible characters
   if (USE_BF && !lazy_bf_attack(hash_result, hash_len, &left_guess, pwd_len, NULL))
     return;
+  */
 }
 
 void compare_pwd(BYTE** hash_result, const int hash_len, const char* pwd_file) {

@@ -23,7 +23,7 @@ This is the first approach will be used for attacking, because people are most l
 to use passwords that are real daily-used words in English since they are the
 easiest to memorize.
 
-Some (9743) of common passwords are provided from COMP30023, stored in "./resources/passwords/common_passwords.txt".
+Some (9744) of common passwords are provided from COMP30023, stored in "./resources/passwords/common_passwords.txt".
 
 When performing dictionary attack, password length has to be specified,
 the program will go through all frequently used passwords stored in common_passwords.text
