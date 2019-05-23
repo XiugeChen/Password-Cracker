@@ -72,7 +72,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <math.h>
 
 #include <sha256.h>
 #include <hash_manage.h>
@@ -84,7 +83,7 @@
 #define BUFFER_SIZE 10240
 // number of bits of each byte
 #define NUM_BIT_PER_BYTE 8
-#define NUM_SUB 4
+#define NUM_SUB 3
 static char const * const DICT_FILE_PATH = "./resources/passwords/common_passwords.txt";
 
 // used for brute force search
@@ -159,7 +158,7 @@ bool lazy_bf_attack(BYTE** hash_result, const int hash_len, int* left_guess,
   generate all possible string and try to match the hash results.
 */
 bool bf_search_match(BYTE** hash_result, const int hash_len, int* left_guess,
-  BYTE** candidate_chars, const int pwd_len);
+  BYTE** candidate_chars, const int pwd_len, const int sub_limit);
 
 /*
   check whether the given password matches any hash results

@@ -25,9 +25,10 @@ easiest to memorize.
 
 Some (9744) of common passwords are provided from COMP30023, stored in "./resources/passwords/common_passwords.txt".
 
-When performing dictionary attack, password length has to be specified,
+When performing dictionary attack, password length has to be specified as l,
 the program will go through all frequently used passwords stored in common_passwords.text
-and also check all the substrings of each password that has the specific length.
+that have length equal or greater than l. For password has length greater
+than l, check only the prefix (length l) of the password.
 
 2. **smart brute force attack**:
 
@@ -46,6 +47,10 @@ with its substitution, like n <-> m, i <-> |, r <-> 2 and so on.
 All common substitution rules are stored at: "./resources/passwords/common_substitution".
 
 b. Capitalize the first character.
+
+Smart brute force attack will try replace only one char in the passwords first,
+than two chars... until reach the maximum allowed number of substitution (here
+I used 3)
 
 3. **Lazy brute force attack**:
 

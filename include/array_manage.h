@@ -16,12 +16,24 @@
 
 #include <stdlib.h>
 #include <sha256.h>
+#include <stdbool.h>
+#include <string.h>
 
 BYTE** alloc_2d_byte(int total_len, int element_len);
 
 /*
   free 2d BYTE array
 */
-void free_2d_byte(BYTE** array, int pwd_len);
+void free_2d_byte(BYTE** array, int len);
+
+/*
+  check whether an element is already in array
+*/
+bool check_element(BYTE** array, BYTE* elem, int len_array);
+
+/*
+  add element to array
+*/
+bool add_element(BYTE** array, BYTE* elem, int len_array);
 
 #endif

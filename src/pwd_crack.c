@@ -20,6 +20,8 @@
 /**** Global Variable ****/
 // used for check whether hash results being attacked
 int CRACK_HASHS[1024] = {0};
+BYTE** GENERATE_PWD = NULL;
+int NUM_PWD = 0;
 // brute force switch
 bool USE_BF = false;
 
@@ -50,33 +52,42 @@ void search_pwd(BYTE** hash_result, const int hash_len, const int num_guess,
   const int pwd_len) {
 
   int left_guess = num_guess;
+  bool keep_execute = true;
+  if (num_guess > 0) {
+    NUM_PWD = num_guess;
+    GENERATE_PWD = alloc_2d_byte(NUM_PWD, pwd_len);
+  }
 
   // try dictionary attack
-  if (!dict_attack(hash_result, hash_len, pwd_len, &left_guess, DICT_FILE_PATH))
-    return;
+  if (keep_execute && !dict_attack(hash_result, hash_len, pwd_len, &left_guess, DICT_FILE_PATH))
+    keep_execute = false;
 
-  // then try smart brute force attack (replace each char with its common substitution and upper)
-  if (!smart_bf_attack(hash_result, hash_len, pwd_len, &left_guess, DICT_FILE_PATH, NUM_SUB))
-    return;
+  for (int sub_limit = 1; sub_limit <= NUM_SUB; sub_limit++) {
+    // then try smart brute force attack (replace each char with its common substitution and upper)
+    if (keep_execute && !smart_bf_attack(hash_result, hash_len, pwd_len, &left_guess, DICT_FILE_PATH, sub_limit))
+      keep_execute = false;
+  }
 
   // then try lazy brute force attack
   // try brute force on numbers only first
-  if (!lazy_bf_attack(hash_result, hash_len, &left_guess, pwd_len, NUMBER_LIST))
-    return;
+  if (keep_execute && !lazy_bf_attack(hash_result, hash_len, &left_guess, pwd_len, NUMBER_LIST))
+    keep_execute = false;
 
   // then try brute force on lowercase characters only
-  if (!lazy_bf_attack(hash_result, hash_len, &left_guess, pwd_len, LOWER_CHAR_LIST))
-    return;
+  if (keep_execute && !lazy_bf_attack(hash_result, hash_len, &left_guess, pwd_len, LOWER_CHAR_LIST))
+    keep_execute = false;
 
   // try brute force on lowercase, uppercase and number characters
-  if (!lazy_bf_attack(hash_result, hash_len, &left_guess, pwd_len, COMMON_CHAR_LIST))
-    return;
+  if (keep_execute && !lazy_bf_attack(hash_result, hash_len, &left_guess, pwd_len, COMMON_CHAR_LIST))
+    keep_execute = false;
 
-  /* UNCOMMET THIS TO TRY BRUTE FORCE SEARCH
+  // Turn on the switch to run BRUTE FORCE SEARCH
   // try brute force on all possible characters
-  if (USE_BF && !lazy_bf_attack(hash_result, hash_len, &left_guess, pwd_len, NULL))
-    return;
-  */
+  if (keep_execute && USE_BF && !lazy_bf_attack(hash_result, hash_len, &left_guess, pwd_len, NULL))
+    keep_execute = false;
+
+  free_2d_byte(GENERATE_PWD, NUM_PWD);
+  return;
 }
 
 void compare_pwd(BYTE** hash_result, const int hash_len, const char* pwd_file) {
@@ -128,36 +139,29 @@ bool dict_attack(BYTE** hash_result, const int hash_len, const int pwd_len,
 
         // only check those passwords have same or greater than specified length
         if (pwd_len <= read_buf_len) {
-          // for each start point of substring
-          for (int i = 0; i <= read_buf_len - pwd_len; i++) {
-            // get the whole substring stored in password
-            for (int j = 0; j < pwd_len; j++)
-              password[j] = read_buf[i + j];
-            password[pwd_len] = '\0';
+          // get the whole substring stored in password
+          for (int j = 0; j < pwd_len; j++)
+            password[j] = read_buf[j];
+          password[pwd_len] = '\0';
 
+          // output results
+          if ((*left_guess) > 0) {
+            // if is already being generated
+            if (!check_element(GENERATE_PWD, password, NUM_PWD)) {
+              printf("%s\n", password);
+              if (!add_element(GENERATE_PWD, password, NUM_PWD))
+                *left_guess = 0;
+              else
+                (*left_guess)--;
+              // reach the limits of number of guesses
+              if (*left_guess == 0)
+                break;
+            }
+          }
+          else {
             // check the first choices
             check_match(hash_result, hash_len, password);
-
-            // reach the limits of number of guesses
-            (*left_guess)--;
-            if (*left_guess == 0)
-              break;
           }
-        }
-        // for passwords have shorter length than specified, fill it with blanks
-        else {
-          strcpy((char*)password, (char*)read_buf);
-
-          for (int i = 0; i < pwd_len - read_buf_len; i++)
-            password[read_buf_len + i] = ' ';
-
-          // check the first choices
-          check_match(hash_result, hash_len, password);
-
-          // reach the limits of number of guesses
-          (*left_guess)--;
-          if (*left_guess == 0)
-            break;
         }
       }
     } while (has_next_line && *left_guess != 0);
@@ -171,7 +175,7 @@ bool dict_attack(BYTE** hash_result, const int hash_len, const int pwd_len,
 }
 
 bool smart_bf_attack(BYTE** hash_result, const int hash_len, const int pwd_len,
-  int* left_guess, const char* dict_file, const int num_sub) {
+  int* left_guess, const char* dict_file, const int sub_limit) {
 
   check_pwd_len(pwd_len);
 
@@ -204,58 +208,57 @@ bool smart_bf_attack(BYTE** hash_result, const int hash_len, const int pwd_len,
 
       // only check those passwords have same or greater than specified length
       if (pwd_len <= read_buf_len) {
-        // for each start point of substring
-        for (int i = 0; i <= read_buf_len - pwd_len; i++) {
-          // get the whole substring stored in password
-          for (int j = 0; j < pwd_len; j++)
-            password[j] = read_buf[i + j];
-          password[pwd_len] = '\0';
+        // get the whole substring stored in password
+        for (int j = 0; j < pwd_len; j++)
+          password[j] = read_buf[j];
+        password[pwd_len] = '\0';
 
-          int total_size = floor(pow(2, pwd_len));
+        int total_size = 1;
+        for (int i = 0; i < pwd_len; i++)
+          total_size *= 2;
 
-          for (int k = 1; k < total_size; k++) {
+        for (int k = 1; k < total_size; k++) {
+          int range = total_size;
+          int count = 0;
+
+          // for each possible combination, generate the corresponding passwords
+          for (int l = 0; l < pwd_len; l++) {
+            int len = 2;
+            range /= len;
+            // avoid float point exception
+            int choice = len > 1 ? (k / range % len) : 0;
+            if (choice == 1)
+              count++;
+          }
+
+          if (count == sub_limit) {
             int range = total_size;
-            int count = 0;
-
             // for each possible combination, generate the corresponding passwords
             for (int l = 0; l < pwd_len; l++) {
+              BYTE c = password[l];
+              candidate_chars[l][0] = c;
+              candidate_chars[l][1] = '\0';
+
               int len = 2;
               range /= len;
               // avoid float point exception
               int choice = len > 1 ? (k / range % len) : 0;
-              if (choice == 1)
-                count++;
-            }
+              if (choice == 1) {
+                get_sub(map, c, sub_buf);
 
-            if (count == num_sub) {
-              int range = total_size;
-              // for each possible combination, generate the corresponding passwords
-              for (int l = 0; l < pwd_len; l++) {
-                BYTE c = password[l];
-                candidate_chars[l][0] = c;
-                candidate_chars[l][1] = '\0';
-
-                int len = 2;
-                range /= len;
-                // avoid float point exception
-                int choice = len > 1 ? (k / range % len) : 0;
-                if (choice == 1) {
-                  get_sub(map, c, sub_buf);
-
-                  int buffer_len = strlen((char*)sub_buf);
-                  sub_buf[buffer_len] = '\0';
-                  strcat((char*)candidate_chars[l], (char*)sub_buf);
-                }
+                int buffer_len = strlen((char*)sub_buf);
+                sub_buf[buffer_len] = '\0';
+                strcat((char*)candidate_chars[l], (char*)sub_buf);
               }
-
-              // try to generate brute force attack on all common substitution of password
-              if (!bf_search_match(hash_result, hash_len, left_guess, candidate_chars, pwd_len))
-                break;
             }
+
+            // try to generate brute force attack on all common substitution of password
+            if (!bf_search_match(hash_result, hash_len, left_guess, candidate_chars, pwd_len, sub_limit))
+              break;
           }
-          if (*left_guess == 0)
-            break;
         }
+        if (*left_guess == 0)
+          break;
       }
     }
   } while (has_next_line && *left_guess != 0);
@@ -295,13 +298,24 @@ bool lazy_bf_attack(BYTE** hash_result, const int hash_len, int* left_guess,
     base_str[i] = candidate_chars[i][0];
   base_str[pwd_len] = '\0';
 
-  // check the first choices
-  check_match(hash_result, hash_len, base_str);
-
-  (*left_guess)--;
+  // output results
+  if ((*left_guess) > 0) {
+    // if is already being generated
+    if (!check_element(GENERATE_PWD, base_str, NUM_PWD)) {
+      printf("%s\n", base_str);
+      if (!add_element(GENERATE_PWD, base_str, NUM_PWD))
+        *left_guess = 0;
+      else
+        (*left_guess)--;
+    }
+  }
+  else {
+    // check the first choices
+    check_match(hash_result, hash_len, base_str);
+  }
 
   // if reach the limits of number of guesses or brute force generate all other combination
-  if (*left_guess == 0 || !bf_search_match(hash_result, hash_len, left_guess, candidate_chars, pwd_len)) {
+  if (*left_guess == 0 || !bf_search_match(hash_result, hash_len, left_guess, candidate_chars, pwd_len, 0)) {
     free_2d_byte(candidate_chars, pwd_len);
     free(base_str);
     return false;
@@ -313,7 +327,7 @@ bool lazy_bf_attack(BYTE** hash_result, const int hash_len, int* left_guess,
 }
 
 bool bf_search_match(BYTE** hash_result, const int hash_len, int* left_guess,
-  BYTE** candidate_chars, const int pwd_len) {
+  BYTE** candidate_chars, const int pwd_len, const int sub_limit) {
 
   long long int total_size = 1;
   BYTE* new_pwd = (BYTE*)malloc((pwd_len + 1) * sizeof(BYTE));
@@ -325,7 +339,7 @@ bool bf_search_match(BYTE** hash_result, const int hash_len, int* left_guess,
 
   for (long long int i = 1; i < total_size; i++) {
     long long int range = total_size;
-
+    int num_sub = 0;
     // for each possible combination, generate the corresponding passwords
     for (int j = 0; j < pwd_len; j++) {
 
@@ -333,16 +347,33 @@ bool bf_search_match(BYTE** hash_result, const int hash_len, int* left_guess,
       range /= len;
       // avoid float point exception
       int choice = len > 1 ? (i / range % len) : 0;
+      if (choice > 0)
+        num_sub++;
+
       new_pwd[j] = candidate_chars[j][choice];
     }
     new_pwd[pwd_len] = '\0';
+    if (sub_limit != 0 && num_sub != sub_limit)
+      continue;
 
-    check_match(hash_result, hash_len, new_pwd);
-
-    // reach the limits of number of guesses
-    (*left_guess)--;
-    if (*left_guess == 0)
-      break;
+    // output results
+    if ((*left_guess) > 0) {
+      // if is already being generated
+      if (!check_element(GENERATE_PWD, new_pwd, NUM_PWD)){
+        printf("%s\n", new_pwd);
+        if (!add_element(GENERATE_PWD, new_pwd, NUM_PWD))
+          *left_guess = 0;
+        else
+          (*left_guess)--;
+        // reach the limits of number of guesses
+        if (*left_guess == 0)
+          break;
+      }
+    }
+    else {
+      // check the first choices
+      check_match(hash_result, hash_len, new_pwd);
+    }
   }
 
   free(new_pwd);
