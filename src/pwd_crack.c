@@ -393,10 +393,7 @@ void check_match(BYTE** hash_result, const int hash_len, BYTE* password) {
       continue;
 
     if (memcmp(hash_result[i], hash_buf, SHA256_BLOCK_SIZE) == 0) {
-      if (strlen((char*)password) == 6)
-        printf("%s %d\n", password, i + 11);
-      else
-        printf("%s %d\n", password, i + 1);
+      printf("%s %d\n", password, i + 1);
       CRACK_HASHS[i] = 1;
     }
   }
