@@ -1,11 +1,12 @@
-## DESCRIPTION
+# Password Cracker
 
-Project 2 for COMP30023 Computer System at University of Melbourne
+## Introduction
 
-A project try to crack the passwords of a simple system that has four- and
-six-character passwords. The passwords can contain any ASCII character from 32
-(space) to 126 (∼), but since the passwords are chosen by people, they are not
-arbitrary strings
+* Project 2 of subject [COMP30023](https://handbook.unimelb.edu.au/2020/subjects/comp30023) (Computer System) at the University of Melbourne, 2019 Sem1.
+
+* This project tries to crack the passwords of a simple system that has four- and six-character passwords. The passwords can contain any ASCII character from 32 (space) to 126 (∼), but since the passwords are chosen by people, they are not arbitrary strings.
+
+## System Description
 
 Password Description:
 Passwords 1 to 10 are all four characters, located in file "./resources/hash_results/pwd4sha256"
@@ -84,25 +85,17 @@ For detailed description please look at resources/project_description.pdf
 
 **To execute after compile**:
 
-1. Diffie-Hellman key change client side:
-
-`./dh`
+1. Diffie-Hellman key change client side: `./dh`
 
 2. password cracker:
 
-a.
+a. `./crack`
 
-`./crack`
-
-b.
-
-`./crack <num_guess>`
+b. `./crack <num_guess>`
 
 where num_guess means the number of guesses will be generated,
 
-c.
-
-`./crack <pwd_file> <hash_file>`
+c. `./crack <pwd_file> <hash_file>`
 
 where pwd_file is the file path to the file contains a list of plain text passwords (one per line)
 hash_file is the file path to the file contains hash results of passwords (one per 32 bytes)
@@ -121,16 +114,10 @@ Subject: COMP30023 Computer Systems
 University of Melbourne
 
 Some code came from:
-1. GitHub
+1. [GitHub](https://github.com/B-Con/crypto-algorithms/blob/master/sha256_test.c)
 
-  (a) sha256.h and sha256.c: https://github.com/B-Con/crypto-algorithms/blob/master/sha256_test.c
+2. [geeksforgeeks](https://www.geeksforgeeks.org/modular-exponentiation-power-in-modular-arithmetic/)
 
-2. geeksforgeeks:
+3. [Stack overflow](https://stackoverflow.com/questions/646241/c-run-a-system-command-and-get-output)
 
-  (a) part of dh.c: https://www.geeksforgeeks.org/modular-exponentiation-power-in-modular-arithmetic/
-
-3. Stack overflow
-
-  (a) part of dh.c: https://stackoverflow.com/questions/646241/c-run-a-system-command-and-get-output
-
-4. Lab 5 of COMP30023 at Unimelb
+4. Lab 5 of [COMP30023](https://handbook.unimelb.edu.au/2020/subjects/comp30023) at Unimelb
